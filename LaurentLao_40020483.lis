@@ -1,0 +1,46 @@
+     1                                  ; SOEN 228 Assembly assignment
+     2                                  ; April 12th 2019
+     3                                  ; Laurent Lao
+     4                                  ; ID: 40020483
+     5                                  
+     6                                  section .data
+     7                                  
+     8                                  ; put your data in this section using
+     9                                  ; db , dw, dd directions
+    10                                  
+    11 00000000 0F                      number db  15
+    12 00000001 01                      answer db  1    ;  1 means number is prime, 0 means number is not prime
+    13                                  section .bss
+    14                                  
+    15                                  ; put UNINITIALIZED data here using
+    16                                   
+    17                                  section .text
+    18                                          global _start
+    19                                  
+    20                                  _start:
+    21 00000000 BE[00000000]                            mov esi, number                 ; get the offset of number into esi  
+    22 00000005 B800000000              keith:          mov eax, 0                      ; clear the entire eax register
+    23 0000000A 8A06                                    mov al, [esi]                   ; get the number from memory into al
+    24 0000000C 88C2                                    mov dl, al                      ; put it inside dl as well
+    25 0000000E B302                                    mov bl, 2                       ; bl holds each divisor starting from 2
+    26                                  
+    27 00000010 F6F3                    loopy:          div bl                          ; ax / bl  with quot in al and rem in ah
+    28 00000012 662500FF                                and ax, 1111111100000000b       ;  isolate the rem in ah with a  AND mask
+    29                                                                                  ; to determine whether the remainder is 0    
+    30 00000016 83F800                  checkremain:    cmp eax, 0                      ; checks whether remainder is 0
+    31 00000019 740F                                    je isnotprime                   ; jump to branch isnot if remainder is 0
+    32                                  
+    33 0000001B B800000000              notzero:        mov eax, 0                      ; clear the entire eax register again
+    34 00000020 88D0                                    mov al, dl                      ; put number back into al
+    35 00000022 FEC3                                    inc bl                          ; increment bl
+    36 00000024 38D8                                    cmp al, bl                      ; check if the divisor is now equal to number
+    37 00000026 7409                                    je programend                   ; end the program if true
+    38                                  
+    39 00000028 EBE6                    lagain:         jmp loopy                       ; else, go back to loopy
+    40                                  
+    41 0000002A C605[01000000]00        isnotprime:     mov  BYTE [answer], 0           ; change the value at address answer to 0 indicating not prime
+    42                                                                                  ; continue into ending the program
+    43 00000031 B801000000              programend:     mov eax, 1                      ; System calls for exit (sys_exit)
+    44 00000036 BB00000000                              mov ebx, 0                      ; Exit return code 0 (no errors)
+    45 0000003B CD80                                    int 80h
+    46                                         
